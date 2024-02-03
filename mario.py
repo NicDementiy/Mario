@@ -12,6 +12,9 @@ HEIGHT = 600
 FPS = 60
 FLOOR = HEIGHT - 6 * HEIGHT / 165 + 2
 
+LEFT_BOUNDARY = 200
+RIGHT_BOUNDARY = WIDTH - LEFT_BOUNDARY
+
 background_image1 = pygame.image.load(
     os.path.join(
         "resources",
@@ -56,28 +59,38 @@ background_speed2 = 1
 background_speed3 = 1.5
 
 
-def update_background(screen):
+def update_background(screen, player_speed):
     # Обновите позиции изображений
-    background_pos1[0] -= background_speed1
-    background_pos2[0] -= background_speed2
-    background_pos3[0] -= background_speed3
+    background_pos1[0] += background_speed1*player_speed
+    background_pos2[0] += background_speed2*player_speed
+    background_pos3[0] += background_speed3*player_speed
 
     # Если изображение полностью вышло за пределы экрана, переместите его обратно
     if background_pos1[0] <= -WIDTH:
         background_pos1[0] = 0
+    elif background_pos1[0] >= WIDTH:
+        background_pos1[0] = -WIDTH
+
     if background_pos2[0] <= -WIDTH:
         background_pos2[0] = 0
+    elif background_pos2[0] >= WIDTH:
+        background_pos2[0] = -WIDTH
+
     if background_pos3[0] <= -WIDTH:
         background_pos3[0] = 0
+    elif background_pos3[0] >= WIDTH:
+        background_pos3[0] = -WIDTH
 
     # Отрисуйте изображения
     screen.blit(background_image1, background_pos1)
     screen.blit(background_image1, (background_pos1[0] + WIDTH, background_pos1[1]))
+    screen.blit(background_image1, (background_pos1[0] - WIDTH, background_pos1[1]))
     screen.blit(background_image2, background_pos2)
     screen.blit(background_image2, (background_pos2[0] + WIDTH, background_pos2[1]))
+    screen.blit(background_image2, (background_pos2[0] - WIDTH, background_pos2[1]))
     screen.blit(background_image3, background_pos3)
     screen.blit(background_image3, (background_pos3[0] + WIDTH, background_pos3[1]))
-
+    screen.blit(background_image3, (background_pos3[0] - WIDTH, background_pos3[1]))
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -93,6 +106,7 @@ class Player(pygame.sprite.Sprite):
         self.v_x = 0
         self.v_y = 1
         self.a = 0.1
+        self.speed = 2
 
     def status(self):
         print(self.x, self.y, self.v_x, self.v_y)
@@ -114,16 +128,16 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-    def move_left(self):
+    def move_left(self, walk=True):
         self.virtulal_index = (self.virtulal_index + 1) % (10 * len(self.images))
         self.index = self.virtulal_index // 10
-        self.x -= 2
+        self.x -= self.speed if walk else 0
         self.direction = "LEFT"
 
-    def move_right(self):
+    def move_right(self, walk=True):
         self.virtulal_index = (self.virtulal_index + 1) % (10 * len(self.images))
         self.index = self.virtulal_index // 10
-        self.x += 2
+        self.x += self.speed if walk else 0
         self.direction = "RIGHT"
 
     def move_up(self):
@@ -165,19 +179,21 @@ def main():
 
         keys_pressed = pygame.key.get_pressed()
         if keys_pressed[pygame.K_LEFT]:
-            player.move_left()
+            if player.rect.x > LEFT_BOUNDARY:
+                player.move_left()
+            else:
+                player.move_left(walk=False)
+                update_background(screen, player.speed)
         if keys_pressed[pygame.K_RIGHT]:
-            player.move_right()
-        # if keys_pressed[pygame.K_UP]:
-        #     player.move_up()
+            if player.rect.x < RIGHT_BOUNDARY:
+                player.move_right()
+            else:
+                player.move_right(walk=False)
+                update_background(screen, -player.speed)
         if keys_pressed[pygame.K_DOWN]:
             player.move_down()
-
-        # Update
-
-        # Draw / render
-        update_background(screen)
-
+        
+        update_background(screen, 0)
         all_sprites.update()
         all_sprites.draw(screen)
         pygame.display.flip()
