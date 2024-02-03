@@ -10,10 +10,73 @@ sprite_images = [
 WIDTH = 900
 HEIGHT = 600
 FPS = 60
-FLOOR = HEIGHT-6*HEIGHT/165+2
+FLOOR = HEIGHT - 6 * HEIGHT / 165 + 2
 
-background_image = pygame.image.load(r"resources\Фон.jpg")
-background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+background_image1 = pygame.image.load(
+    os.path.join(
+        "resources",
+        "oak_woods_v1.0",
+        "oak_woods_v1.0",
+        "background",
+        "background_layer_1.png",
+    )
+)
+background_image2 = pygame.image.load(
+    os.path.join(
+        "resources",
+        "oak_woods_v1.0",
+        "oak_woods_v1.0",
+        "background",
+        "background_layer_2.png",
+    )
+)
+background_image3 = pygame.image.load(
+    os.path.join(
+        "resources",
+        "oak_woods_v1.0",
+        "oak_woods_v1.0",
+        "background",
+        "background_layer_3.png",
+    )
+)
+
+# Масштабируйте изображения до нужного размера
+background_image1 = pygame.transform.scale(background_image1, (WIDTH, HEIGHT))
+background_image2 = pygame.transform.scale(background_image2, (WIDTH, HEIGHT))
+background_image3 = pygame.transform.scale(background_image3, (WIDTH, HEIGHT))
+
+# Установите начальные позиции для изображений
+background_pos1 = [0, 0]
+background_pos2 = [0, 0]
+background_pos3 = [0, 0]
+
+# Установите скорости движения для каждого изображения
+background_speed1 = 0.5
+background_speed2 = 1
+background_speed3 = 1.5
+
+
+def update_background(screen):
+    # Обновите позиции изображений
+    background_pos1[0] -= background_speed1
+    background_pos2[0] -= background_speed2
+    background_pos3[0] -= background_speed3
+
+    # Если изображение полностью вышло за пределы экрана, переместите его обратно
+    if background_pos1[0] <= -WIDTH:
+        background_pos1[0] = 0
+    if background_pos2[0] <= -WIDTH:
+        background_pos2[0] = 0
+    if background_pos3[0] <= -WIDTH:
+        background_pos3[0] = 0
+
+    # Отрисуйте изображения
+    screen.blit(background_image1, background_pos1)
+    screen.blit(background_image1, (background_pos1[0] + WIDTH, background_pos1[1]))
+    screen.blit(background_image2, background_pos2)
+    screen.blit(background_image2, (background_pos2[0] + WIDTH, background_pos2[1]))
+    screen.blit(background_image3, background_pos3)
+    screen.blit(background_image3, (background_pos3[0] + WIDTH, background_pos3[1]))
 
 
 class Player(pygame.sprite.Sprite):
@@ -113,7 +176,8 @@ def main():
         # Update
 
         # Draw / render
-        screen.blit(background_image, (0, 0))
+        update_background(screen)
+
         all_sprites.update()
         all_sprites.draw(screen)
         pygame.display.flip()
